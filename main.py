@@ -50,6 +50,7 @@ class PathFinder:
         self.graph = Graph(self.grid)
         self.start = (0, 0)
         self.finish = (5, 5)
+        self.has_diag_dirs = False
         self.select_mode = PathFinder.FINISH_MODE
 
         self.__recount_cell_size()
@@ -144,21 +145,27 @@ class PathFinder:
         self.graph = Graph(self.grid)
         self.path.clear()
 
+    def __recreate_grid(self):
+        self.grid = Grid(self.CELLS_NUM, self.CELLS_NUM, self.has_diag_dirs)
+        self.grid.randomize()
+        self.graph = Graph(self.grid)
+        self.__recount_cell_size()
+        self.path.clear()
+
     def increase_cells_count(self):
         if self.CELLS_NUM < PathFinder.MAX_CELLS_SIZE:
             self.CELLS_NUM *= 2
-            self.grid = Grid(self.CELLS_NUM, self.CELLS_NUM)
-            self.grid.randomize()
-            self.graph = Graph(self.grid)
-            self.__recount_cell_size()
+            self.__recreate_grid()
 
     def decrease_cells_count(self):
         if self.CELLS_NUM > PathFinder.MIN_CELLS_SIZE:
             self.CELLS_NUM //= 2
-            self.grid = Grid(self.CELLS_NUM, self.CELLS_NUM)
-            self.grid.randomize()
-            self.graph = Graph(self.grid)
-            self.__recount_cell_size()
+            self.__recreate_grid()
+
+    def change_diag_dirs(self):
+        self.has_diag_dirs = not self.has_diag_dirs
+        self.grid.diag_dir = self.has_diag_dirs
+        self.graph = Graph(self.grid)
 
     def __switch_modes(self, events):
         for event in events:
@@ -171,13 +178,15 @@ class PathFinder:
                 settings = {pygame.K_5: self.change_show_edges,
                             pygame.K_6: self.randomize_map,
                             pygame.K_7: self.increase_cells_count,
-                            pygame.K_8: self.decrease_cells_count}
+                            pygame.K_8: self.decrease_cells_count,
+                            pygame.K_9: self.change_diag_dirs}
 
                 if event.key in modes.keys():
                     self.select_mode = modes[event.key]
                     print(self.select_mode)
                 elif event.key in settings:
                     settings[event.key]()
+                    print(settings[event.key])
 
     def __make_action_on_click(self):
         m_x, m_y = self._count_mouse_pos()

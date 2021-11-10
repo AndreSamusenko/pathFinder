@@ -38,7 +38,7 @@ class Grid:
     def get_neighbours(self, x, y):
         directions = {(-1, 0), (0, -1), (1, 0), (0, 1)}
         if self.diag_dir:
-            directions.update((-1, -1), (1, -1), (1, 1), (-1, 1))
+            directions.update(((-1, -1), (1, -1), (1, 1), (-1, 1)))
 
         neighbors = []
         for x_dir, y_dir in directions:
