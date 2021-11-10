@@ -2,7 +2,7 @@ import random
 
 
 class Grid:
-    RANDOM_COEFFICIENT = 3
+    RANDOM_COEFFICIENT = 2
     EMPTY_CELL = 0
     FILLED_CELL = 1
 
@@ -26,15 +26,16 @@ class Grid:
                 self.cells[i][j] = Grid.EMPTY_CELL \
                     if random.randint(random_floor, random_ceil) > Grid.RANDOM_COEFFICIENT \
                     else Grid.FILLED_CELL
+        self.cells[0][0] = 0
 
     def _check_indexes(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height
 
     def check_neighbors(self, x, y):
-        return self._check_indexes(x, y) and not self.cells[y][x]
+        return self._check_indexes(x, y) and not self.cells[x][y]
 
     def get_neighbours(self, x, y):
-        directions = [-1, 0], [0, -1], [1, 0], [0, 1], [-1, -1], [1, -1], [1, 1], [-1, 1]
+        directions = [-1, 0], [0, -1], [1, 0], [0, 1]#, [-1, -1], [1, -1], [1, 1], [-1, 1]
 
         neighbors = []
         for x_dir, y_dir in directions:

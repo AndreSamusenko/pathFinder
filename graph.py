@@ -8,10 +8,10 @@ class Graph:
         self._make_graph(grid)
 
     def _make_graph(self, grid):
-        for y, row in enumerate(grid.cells):
-            for x, col in enumerate(row):
-                if not col:
-                    self.adjacent_vertices[(x, y)] = self.adjacent_vertices.get((x, y), []) + grid.get_neighbours(x, y)
+        for x in range(grid.width):
+            for y in range(grid.height):
+                if grid.cells[x][y] == grid.EMPTY_CELL:
+                    self.adjacent_vertices[(x, y)] = grid.get_neighbours(x, y)
 
     def __str__(self):
         return str(self.adjacent_vertices)
