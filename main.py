@@ -5,31 +5,36 @@ import pygame
 
 def game_scene(func):
     def wrapper(self, *arg, **kw):
-        while True:
+        stop_game = False
+        while not stop_game:
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
                     exit()
 
-            res = func(self, *arg, **kw)
+            stop_game = func(self, *arg, **kw)
 
             self.clock.tick(PathFinder.FPS)
             pygame.display.update()
 
-            if res:
-                break
         # return res
+
     return wrapper
 
 
 class PathFinder:
     WIDTH, HEIGHT = 600, 600  # размеры игрового окна
-    FPS = 5
+    FPS = 15
 
     def __init__(self):
         self.grid = Grid(10, 10)
         self.grid.randomize()
         self.graph = Graph(self.grid)
+
+        self.cell_width = self.WIDTH // self.grid.width
+        self.cell_height = self.HEIGHT // self.grid.height
+        self.cell_border = 2
+
         self.pygame_init()
         self.path = self.graph.bfs((0, 0), (8, 8))
         self.select_game()
@@ -37,11 +42,11 @@ class PathFinder:
         # path = graph.bfs((0, 0), (4, 3))
 
     def pygame_init(self):
-        pygame.init()  # объявляем использование библиотеки pygame
-        pygame.display.set_caption("Name")  # название окна
-        self.screen = pygame.display.set_mode((PathFinder.WIDTH, PathFinder.HEIGHT))  # создаём игровое окно
-        self.clock = pygame.time.Clock()  # создаём таймер
-        self.font = pygame.font.SysFont('arial', 36)  # шрифт
+        pygame.init()
+        pygame.display.set_caption("Name")
+        self.screen = pygame.display.set_mode((PathFinder.WIDTH, PathFinder.HEIGHT))
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont('arial', 36)
 
     def draw_edges(self):
         for vertex in self.graph.adjacent_vertices:
@@ -51,52 +56,45 @@ class PathFinder:
                 pygame.draw.line(self.screen, pygame.Color('red'), (v_x * 60 + 28, v_y * 60 + 28),
                                  (p_x * 60 + 28, p_y * 60 + 28), width=5)
 
-    # def draw_game(self):
-    #     path = self.graph.bfs((0, 0), (8, 8))
-    #
-    #     while True:
-    #         events = pygame.event.get()
-    #         for event in events:
-    #             if event.type == pygame.QUIT:
-    #                 exit()
-    #         for i in range(10):
-    #             for j in range(10):
-    #                 if (i, j) in path:
-    #                     color = pygame.Color('white')
-    #                 elif not self.grid.cells[i][j]:
-    #                     color = pygame.Color('green')
-    #                 else:
-    #                     color = pygame.Color('orange')
-    #                 pygame.draw.rect(self.screen, color, pygame.Rect(i * 60 + 2, j * 60 + 2, 56, 56))
-    #         # self.draw_edges()
-    #         self.clock.tick(PathFinder.FPS)
-    #         pygame.display.update()
+    def draw_cell(self, color, x, y):
+        pygame.draw.rect(self.screen, color, pygame.Rect(x * self.cell_width + self.cell_border,
+                                                         y * self.cell_height + self.cell_border,
+                                                         self.cell_width - 2 * self.cell_border,
+                                                         self.cell_height - 2 * self.cell_border))
 
     def draw_grid(self):
-        cell_width = self.WIDTH // self.grid.width
-        cell_height = self.HEIGHT // self.grid.height
-        cell_border = 2
-
-        for i in range(10):
-            for j in range(10):
+        for i in range(self.grid.width):
+            for j in range(self.grid.height):
                 if (i, j) in self.path:
                     color = pygame.Color('white')
                 elif not self.grid.cells[i][j]:
                     color = pygame.Color('green')
                 else:
                     color = pygame.Color('orange')
-                pygame.draw.rect(self.screen, color, pygame.Rect(i * cell_width + cell_border,
-                                                                 j * cell_height + cell_border,
-                                                                 cell_width - 2 * cell_border,
-                                                                 cell_height - 2 * cell_border))
+                self.draw_cell(color, i, j)
+
+    def _count_mouse_pos(self):
+        cell_width = self.WIDTH // self.grid.width
+        cell_height = self.HEIGHT // self.grid.height
+
+        m_x, m_y = pygame.mouse.get_pos()
+        m_x //= cell_width
+        m_y //= cell_height
+
+        return m_x, m_y
 
     @game_scene
     def select_game(self):
         self.draw_grid()
-
-
         # self.draw_edges()
-        # return True
+
+        m_x, m_y = self._count_mouse_pos()
+        if self.grid.cells[m_x][m_y] == Grid.EMPTY_CELL:
+            self.draw_cell(pygame.color.Color("pink"), m_x, m_y)
+
+            clicked = pygame.mouse.get_pressed()[0]
+            if clicked:
+                self.path = self.graph.bfs((0, 0), (m_x, m_y))
 
 
 game = PathFinder()
