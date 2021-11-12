@@ -56,13 +56,14 @@ class PathFinder:
         self.screen = None
         self.clock = None
         self.font = None
-        self.pygame_init()
+        self.__pygame_init()
         self.path = {}
         self.select_game()
 
-    def pygame_init(self):
+    def __pygame_init(self):
         pygame.init()
         pygame.display.set_caption("Path Finder")
+        pygame.display.set_icon(pygame.image.load("img/icon.png"))
         self.screen = pygame.display.set_mode((PathFinder.WIDTH, PathFinder.HEIGHT))
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont('arial', 36)
